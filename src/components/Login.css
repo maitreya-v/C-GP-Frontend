@@ -17,3 +17,11 @@
   visibility: hidden;
 } 
 
+.register-link{
+  color: rgba(0,0,0,0.7);
+  margin: 3px;
+}
+
+.register-link:hover{
+    color: black;
+}

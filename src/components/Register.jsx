@@ -202,7 +202,7 @@ const Register = () => {
                       color="black"
                       size="lg"
                       width="xs"
-                      _focus={{ borderColor: "blackAlpha.900" }}
+                      _focus={{ borderColor: "blackAlpha.900" , bg:'#eee' }}
                       _hover={{}}
                       bg="#eee"
                       value={username}
@@ -318,10 +318,7 @@ const Register = () => {
                     bg="blackAlpha.900"
                     color="white"
                     _hover={{ bg: "blackAlpha.800" }}
-                    onClick={(e)=>{
-                      onRegisterHandler(e);
-                    
-                    }}
+                    onClick={onRegisterHandler}
                   >
                     Register
                   </Button>
