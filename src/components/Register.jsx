@@ -32,6 +32,11 @@ import { FaLock } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { BsExclamationTriangleFill } from "react-icons/bs";
 import { Field, Form, Formik } from "formik";
+import { useToast } from '@chakra-ui/react'
+
+
+
+
 const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -48,6 +53,10 @@ const Register = () => {
   const noErrorUsername = `d-flex margin ${showUsernameError ? "hidden" : ""}`;
   const noErrorEmail = `d-flex margin ${showEmailError ? "hidden" : ""}`;
   const noErrorPassword = `d-flex margin ${showPasswordError ? "hidden" : ""}`;
+  
+  const [showToast,setShowToast] = useState(false);
+
+  const toast = useToast();
 
   const onRegisterHandler = (e) => {
     e.preventDefault();
@@ -55,6 +64,8 @@ const Register = () => {
       setShowPasswordError(true);
     } else {  
       setShowPasswordError(false);
+      setShowRepasswordError(false);
+      setShowEmailError(false);
       const postObj = {
         name: username,
         email: email,
@@ -62,8 +73,6 @@ const Register = () => {
         re_password: repassword,
       };
 
-      //  const headers=('Access-Control-Allow-Origin: *');
-      // const headers={'Access-Control-Allow-Origin':'*'}
       console.log(postObj);
       axios
         .post("http://127.0.0.1:8000/auth/users/", postObj)
@@ -72,47 +81,77 @@ const Register = () => {
           setEmail("");
           setPassword("");
           setRepassword("");
+          // setShowToast(true);
+          toast({
+            title: 'Account Created.',
+            description: "Please check your mail.",
+            status: 'success',
+            duration: 9000,
+            position:'bottom-right',
+            isClosable: true,
+          })
           console.log(res);
         })
         .catch((error) => {
-          if(error.response.request.response=='{"non_field_errors":["The two password fields didn\'t match."]}'){
-           setShowPasswordError(true);
-           setShowRepasswordError(true);
+          
+          if(error.response.request.response==='{\"email\":[\"account with this email already exists.\"]}'){
+            setShowEmailError(true);
+            toast({
+              title: 'Account with this email address already exists',
+              description: "Please enter a different email address.",
+              status: 'error',
+              duration: 9000,
+              position:'bottom-right',
+              isClosable: true,
+            })
+          }
+          else if(error.response.request.response==='{\"email\":[\"Enter a valid email address.\"]}'){
+            setShowEmailError(true);
+            toast({
+              title: 'Enter a valid email address',
+              description: "Please enter a different email address.",
+              status: 'error',
+              duration: 9000,
+              position:'bottom-right',
+              isClosable: true,
+            })
+          }
+          else{
+            setShowEmailError(false);
+          }
+          if(error.response.request.response==='{"non_field_errors":["The two password fields didn\'t match."]}'){
+            setShowPasswordError(true);
+            setShowRepasswordError(true);
+            toast({
+              title: 'The passwords don\'t match!!',
+              description: "Please enter password again.",
+              status: 'error',
+              duration: 9000,
+              position:'bottom-right',
+              isClosable: true,
+            })
+          }
+          
+          else if(error.response.request.response==="{\"password\":[\"The password is too similar to the email.\"]}"){
+            setShowPasswordError(true);
+            setShowRepasswordError(true);
+            toast({
+              title: 'The password is too similar to the email',
+              description: "Please enter a different password.",
+              status: 'error',
+              duration: 9000,
+              position:'bottom-right',
+              isClosable: true,
+            })
           }
           else{
             setShowPasswordError(false);
             setShowRepasswordError(false);
           }
-          if(error.response.request.response=='{\"email\":[\"account with this email already exists.\"]}' ||
-             error.response.request.response=='{\"email\":[\"Enter a valid email address.\"]}'){
-            setShowEmailError(true);
-          }
-          else{
-            setShowEmailError(false);
-          }
           // else if(error.response.request.response=='')
           console.log(error);
           });
 
-      // axios.post('http://127.0.0.1:8000/api/register/',postObj).then((res)=>{
-      //  if(res.status===200) navigate("/")
-      // })
-      // .catch((error) => {
-      //   console.log(error)
-      //   if (error.response.data.username) {
-      //     // setShow(true);
-      //     setShowUsernameError(false);
-      //   }
-      //   else{
-      //     setShowUsernameError(true);
-      //   }
-      //   if(error.response.data.email){
-      //     setShowEmailError(false);
-      //   }
-      //   else{
-      //     setShowEmailError(true);
-      //   }
-      // });
     }
   };
 
@@ -277,7 +316,10 @@ const Register = () => {
                     bg="blackAlpha.900"
                     color="white"
                     _hover={{ bg: "blackAlpha.800" }}
-                    onClick={onRegisterHandler}
+                    onClick={(e)=>{
+                      onRegisterHandler(e);
+                    
+                    }}
                   >
                     Register
                   </Button>
