@@ -30,6 +30,7 @@ import {
 import { FaUser } from "react-icons/fa";
 import { FaLock } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
+import { BsExclamationTriangleFill } from "react-icons/bs";
 import { Field, Form, Formik } from "formik";
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -39,9 +40,10 @@ const Register = () => {
   const navigate = useNavigate();
   const [show, setShow] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [showUsernameError, setShowUsernameError] = useState(true);
-  const [showEmailError, setShowEmailError] = useState(true);
-  const [showPasswordError, setShowPasswordError] = useState(true);
+  const [showUsernameError, setShowUsernameError] = useState(false);
+  const [showEmailError, setShowEmailError] = useState(false);
+  const [showPasswordError, setShowPasswordError] = useState(false);
+  const [showRepasswordError, setShowRepasswordError] = useState(false);
   const error = "d-flex";
   const noErrorUsername = `d-flex margin ${showUsernameError ? "hidden" : ""}`;
   const noErrorEmail = `d-flex margin ${showEmailError ? "hidden" : ""}`;
@@ -50,9 +52,9 @@ const Register = () => {
   const onRegisterHandler = (e) => {
     e.preventDefault();
     if (password.length < 8) {
-      setShowPasswordError(false);
-    } else {
       setShowPasswordError(true);
+    } else {  
+      setShowPasswordError(false);
       const postObj = {
         name: username,
         email: email,
@@ -73,8 +75,24 @@ const Register = () => {
           console.log(res);
         })
         .catch((error) => {
+          if(error.response.request.response=='{"non_field_errors":["The two password fields didn\'t match."]}'){
+           setShowPasswordError(true);
+           setShowRepasswordError(true);
+          }
+          else{
+            setShowPasswordError(false);
+            setShowRepasswordError(false);
+          }
+          if(error.response.request.response=='{\"email\":[\"account with this email already exists.\"]}' ||
+             error.response.request.response=='{\"email\":[\"Enter a valid email address.\"]}'){
+            setShowEmailError(true);
+          }
+          else{
+            setShowEmailError(false);
+          }
+          // else if(error.response.request.response=='')
           console.log(error);
-        });
+          });
 
       // axios.post('http://127.0.0.1:8000/api/register/',postObj).then((res)=>{
       //  if(res.status===200) navigate("/")
@@ -154,11 +172,21 @@ const Register = () => {
                 <FormControl isRequired>
                   <FormLabel>Email</FormLabel>
                   <InputGroup>
-                    <InputLeftElement
+                    {
+                      showEmailError ?
+                      <InputLeftElement
+                        pointerEvents="none"
+                        children={<BsExclamationTriangleFill/> } 
+                        mt="5px"
+                        color='red'
+                      />
+                      :
+                      <InputLeftElement
                       pointerEvents="none"
-                      children={<MdEmail />}
+                      children={<MdEmail /> } 
                       mt="5px"
                     />
+                    }
                     <Input
                       placeholder="sasha@gmail.com"
                       type="email"
@@ -167,6 +195,7 @@ const Register = () => {
                       width="xs"
                       _focus={{ borderColor: "blackAlpha.900" }}
                       _hover={{}}
+                      style={{borderColor: showEmailError ? 'red' : ''}}
                       bg="#eee"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -176,11 +205,21 @@ const Register = () => {
                 <FormControl isRequired>
                   <FormLabel>Password</FormLabel>
                   <InputGroup>
-                    <InputLeftElement
+                  {
+                      showPasswordError ?
+                      <InputLeftElement
+                        pointerEvents="none"
+                        children={<BsExclamationTriangleFill/> } 
+                        mt="5px"
+                        color='red'
+                      />
+                      :
+                      <InputLeftElement
                       pointerEvents="none"
-                      children={<FaLock />}
+                      children={<FaLock /> } 
                       mt="5px"
                     />
+                    }
                     <Input
                       placeholder="Enter Password"
                       type="password"
@@ -189,6 +228,7 @@ const Register = () => {
                       width="xs"
                       _focus={{ borderColor: "blackAlpha.900" }}
                       _hover={{}}
+                      style={{borderColor: showPasswordError ? 'red' : ''}}
                       bg="#eee"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -198,11 +238,21 @@ const Register = () => {
                 <FormControl isRequired>
                   <FormLabel>Confirm Password</FormLabel>
                   <InputGroup>
-                    <InputLeftElement
+                  {
+                      showRepasswordError ?
+                      <InputLeftElement
+                        pointerEvents="none"
+                        children={<BsExclamationTriangleFill/> } 
+                        mt="5px"
+                        color='red'
+                      />
+                      :
+                      <InputLeftElement
                       pointerEvents="none"
-                      children={<FaLock />}
+                      children={<FaLock /> } 
                       mt="5px"
                     />
+                    }
                     <Input
                       placeholder="Confirm Password"
                       type="password"
@@ -211,6 +261,7 @@ const Register = () => {
                       width="xs"
                       _focus={{ borderColor: "blackAlpha.900" }}
                       _hover={{}}
+                      style={{borderColor: showRepasswordError ? 'red' : ''}}
                       bg="#eee"
                       value={repassword}
                       onChange={(e) => setRepassword(e.target.value)}
